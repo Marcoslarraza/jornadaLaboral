@@ -5,9 +5,9 @@ class RegistroTurnos {
         this.supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxYXV0cWVkanJicGN3YW9yb3FxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3Nzg2MTMsImV4cCI6MjA4MDM1NDYxM30.yBdy0Qkr5cAHkfESZ-p1051HPCu14T4XIil6AJgw0Gc';
         this.supabase = window.supabase.createClient(this.supabaseUrl, this.supabaseKey);
         
-        // ID de usuario simple (en producción usarías autenticación real)
-        this.userId = localStorage.getItem('userId') || 'user-demo-' + Date.now();
-        localStorage.setItem('userId', this.userId);
+        // Estado de autenticación
+        this.usuario = null;
+        this.userId = null;
         
         this.registros = [];
         this.jornadaActiva = null;
