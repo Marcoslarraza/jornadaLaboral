@@ -108,10 +108,18 @@ class RegistroTurnos {
     }
 
     switchTab(tab) {
+        console.log('Switching to tab:', tab);
         const loginForm = document.getElementById('login-form');
         const registerForm = document.getElementById('register-form');
         const loginTab = document.getElementById('tab-login');
         const registerTab = document.getElementById('tab-register');
+        
+        console.log('Elements found:', {
+            loginForm: !!loginForm,
+            registerForm: !!registerForm,
+            loginTab: !!loginTab,
+            registerTab: !!registerTab
+        });
         
         if (tab === 'login') {
             loginForm.classList.add('active');
