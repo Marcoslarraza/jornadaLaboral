@@ -199,8 +199,14 @@ class RegistroTurnos {
         document.getElementById('btn-logout').addEventListener('click', () => this.logout());
         
         // Tabs de login
-        document.getElementById('tab-login').addEventListener('click', () => this.switchTab('login'));
-        document.getElementById('tab-register').addEventListener('click', () => this.switchTab('register'));
+        document.getElementById('tab-login').addEventListener('click', () => {
+            console.log('Login tab clicked');
+            this.switchTab('login');
+        });
+        document.getElementById('tab-register').addEventListener('click', () => {
+            console.log('Register tab clicked');
+            this.switchTab('register');
+        });
         
         // Botones de jornada
         document.getElementById('btn-iniciar').addEventListener('click', () => this.iniciarJornada());
