@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Turnos de Trabajo</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Registro de Turnos de Trabajo</h1>
+            <div class="fecha-actual">
+                <label for="fecha">Fecha:</label>
+                <input type="date" id="fecha" readonly>
+            </div>
+        </header>
+
+        <main>
+            <section class="control-jornada">
+                <div class="jornada-inicio">
+                    <h2>Iniciar Jornada</h2>
+                    <div class="hora-control">
+                        <input type="time" id="hora-inicio" readonly>
+                        <button id="btn-iniciar" class="btn btn-primary">Iniciar Jornada</button>
+                    </div>
+                </div>
+
+                <div class="jornada-fin">
+                    <h2>Finalizar Jornada</h2>
+                    <div class="hora-control">
+                        <input type="time" id="hora-fin" readonly>
+                        <button id="btn-finalizar" class="btn btn-secondary" disabled>Finalizar Jornada</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="estado-jornada">
+                <div id="estado-jornada" class="estado-inactivo">
+                    <p>No hay jornada activa</p>
+                </div>
+            </section>
+
+            <section class="registros-mensuales">
+                <div class="header-registros">
+                    <h2>Registros del Mes</h2>
+                    <div class="controles-mes">
+                        <button id="btn-mes-anterior" class="btn btn-small">← Mes Anterior</button>
+                        <span id="mes-actual"></span>
+                        <button id="btn-mes-siguiente" class="btn btn-small">Mes Siguiente →</button>
+                    </div>
+                </div>
+                
+                <div class="resumen-mensual">
+                    <div class="total-horas">
+                        <strong>Total horas trabajadas este mes:</strong>
+                        <span id="total-horas-mes">0h 0m</span>
+                    </div>
+                    <button id="btn-exportar-pdf" class="btn btn-export">Exportar a PDF</button>
+                </div>
+
+                <div class="tabla-registros">
+                    <table id="tabla-registros">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Hora Inicio</th>
+                                <th>Hora Fin</th>
+                                <th>Horas Trabajadas</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpo-tabla">
+                        </tbody>
+                    </table>
+                    <div id="sin-registros" class="sin-registros">
+                        No hay registros para este mes
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Modal para editar registro -->
+        <div id="modal-editar" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Editar Registro</h2>
+                <form id="form-editar">
+                    <div class="form-group">
+                        <label for="editar-fecha">Fecha:</label>
+                        <input type="date" id="editar-fecha" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editar-hora-inicio">Hora Inicio:</label>
+                        <input type="time" id="editar-hora-inicio" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editar-hora-fin">Hora Fin:</label>
+                        <input type="time" id="editar-hora-fin" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                        <button type="button" class="btn btn-secondary" id="btn-cancelar-editar">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
