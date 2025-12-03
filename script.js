@@ -87,6 +87,14 @@ class RegistroTurnos {
             if (session) {
                 this.usuario = session.user;
                 this.userId = session.user.id;
+                
+                // Cargar datos del usuario
+                await this.cargarJornadaActiva();
+                await this.cargarRegistros();
+                
+                this.actualizarEstadoJornada();
+                this.actualizarRegistrosMensuales();
+                
                 return true;
             }
             return false;
@@ -97,29 +105,24 @@ class RegistroTurnos {
     }
 
     mostrarInterfazLogin() {
-        document.getElementById('login-container').style.display = 'block';
+        document.getElementById('login-container').style.display = 'flex';
         document.getElementById('app-container').style.display = 'none';
     }
 
     mostrarInterfazPrincipal() {
         document.getElementById('login-container').style.display = 'none';
         document.getElementById('app-container').style.display = 'block';
-        document.getElementById('user-email').textContent = this.usuario.email;
+        const userEmailElement = document.getElementById('user-email');
+        if (userEmailElement && this.usuario) {
+            userEmailElement.textContent = this.usuario.email;
+        }
     }
 
     switchTab(tab) {
-        console.log('Switching to tab:', tab);
         const loginForm = document.getElementById('login-form');
         const registerForm = document.getElementById('register-form');
         const loginTab = document.getElementById('tab-login');
         const registerTab = document.getElementById('tab-register');
-        
-        console.log('Elements found:', {
-            loginForm: !!loginForm,
-            registerForm: !!registerForm,
-            loginTab: !!loginTab,
-            registerTab: !!registerTab
-        });
         
         if (tab === 'login') {
             loginForm.classList.add('active');
@@ -155,15 +158,17 @@ class RegistroTurnos {
     }
 
     async inicializar() {
+        // Verificar si hay una sesión activa
+        const sesionActiva = await this.verificarSesion();
+        
+        if (sesionActiva) {
+            this.mostrarInterfazPrincipal();
+        } else {
+            this.mostrarInterfazLogin();
+        }
+        
         this.actualizarFechaYHora();
         this.configurarEventListeners();
-        
-        // Cargar datos guardados
-        await this.cargarJornadaActiva();
-        await this.cargarRegistros();
-        
-        this.actualizarEstadoJornada();
-        this.actualizarRegistrosMensuales();
         
         // Actualizar hora cada segundo
         setInterval(() => this.actualizarFechaYHora(), 1000);
@@ -194,35 +199,73 @@ class RegistroTurnos {
 
     configurarEventListeners() {
         // Event listeners de autenticación
-        document.getElementById('login-form').addEventListener('submit', (e) => this.handleLogin(e));
-        document.getElementById('register-form').addEventListener('submit', (e) => this.handleRegister(e));
-        document.getElementById('btn-logout').addEventListener('click', () => this.logout());
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const btnLogout = document.getElementById('btn-logout');
+        
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+        }
+        if (registerForm) {
+            registerForm.addEventListener('submit', (e) => this.handleRegister(e));
+        }
+        if (btnLogout) {
+            btnLogout.addEventListener('click', () => this.logout());
+        }
         
         // Tabs de login
-        document.getElementById('tab-login').addEventListener('click', () => {
-            console.log('Login tab clicked');
-            this.switchTab('login');
-        });
-        document.getElementById('tab-register').addEventListener('click', () => {
-            console.log('Register tab clicked');
-            this.switchTab('register');
-        });
+        const tabLogin = document.getElementById('tab-login');
+        const tabRegister = document.getElementById('tab-register');
+        
+        if (tabLogin) {
+            tabLogin.addEventListener('click', () => this.switchTab('login'));
+        }
+        if (tabRegister) {
+            tabRegister.addEventListener('click', () => this.switchTab('register'));
+        }
         
         // Botones de jornada
-        document.getElementById('btn-iniciar').addEventListener('click', () => this.iniciarJornada());
-        document.getElementById('btn-finalizar').addEventListener('click', () => this.finalizarJornada());
+        const btnIniciar = document.getElementById('btn-iniciar');
+        const btnFinalizar = document.getElementById('btn-finalizar');
+        
+        if (btnIniciar) {
+            btnIniciar.addEventListener('click', () => this.iniciarJornada());
+        }
+        if (btnFinalizar) {
+            btnFinalizar.addEventListener('click', () => this.finalizarJornada());
+        }
         
         // Controles de mes
-        document.getElementById('btn-mes-anterior').addEventListener('click', () => this.cambiarMes(-1));
-        document.getElementById('btn-mes-siguiente').addEventListener('click', () => this.cambiarMes(1));
+        const btnMesAnterior = document.getElementById('btn-mes-anterior');
+        const btnMesSiguiente = document.getElementById('btn-mes-siguiente');
+        
+        if (btnMesAnterior) {
+            btnMesAnterior.addEventListener('click', () => this.cambiarMes(-1));
+        }
+        if (btnMesSiguiente) {
+            btnMesSiguiente.addEventListener('click', () => this.cambiarMes(1));
+        }
         
         // Exportar PDF
-        document.getElementById('btn-exportar-pdf').addEventListener('click', () => this.exportarPDF());
+        const btnExportarPdf = document.getElementById('btn-exportar-pdf');
+        if (btnExportarPdf) {
+            btnExportarPdf.addEventListener('click', () => this.exportarPDF());
+        }
         
         // Modal
-        document.getElementById('form-editar').addEventListener('submit', (e) => this.guardarEdicion(e));
-        document.getElementById('btn-cancelar-editar').addEventListener('click', () => this.cerrarModal());
-        document.querySelector('.close').addEventListener('click', () => this.cerrarModal());
+        const formEditar = document.getElementById('form-editar');
+        const btnCancelarEditar = document.getElementById('btn-cancelar-editar');
+        const closeModal = document.querySelector('.close');
+        
+        if (formEditar) {
+            formEditar.addEventListener('submit', (e) => this.guardarEdicion(e));
+        }
+        if (btnCancelarEditar) {
+            btnCancelarEditar.addEventListener('click', () => this.cerrarModal());
+        }
+        if (closeModal) {
+            closeModal.addEventListener('click', () => this.cerrarModal());
+        }
         
         // Cerrar modal al hacer clic fuera
         window.addEventListener('click', (e) => {
@@ -327,6 +370,8 @@ class RegistroTurnos {
         const btnIniciar = document.getElementById('btn-iniciar');
         const btnFinalizar = document.getElementById('btn-finalizar');
         
+        if (!estadoDiv || !btnIniciar || !btnFinalizar) return;
+        
         if (this.jornadaActiva) {
             estadoDiv.innerHTML = `
                 <p class="estado-activo">
@@ -351,6 +396,8 @@ class RegistroTurnos {
     actualizarRegistrosMensuales() {
         // Actualizar título del mes
         const mesSpan = document.getElementById('mes-actual');
+        if (!mesSpan) return;
+        
         const opciones = { year: 'numeric', month: 'long' };
         mesSpan.textContent = this.mesActual.toLocaleDateString('es-ES', opciones);
         
@@ -369,15 +416,17 @@ class RegistroTurnos {
         const mes = fecha.getMonth();
         
         return this.registros.filter(registro => {
-            const registroFecha = new Date(registro.fecha);
+            const registroFecha = new Date(registro.fecha + 'T00:00:00');
             return registroFecha.getFullYear() === año && registroFecha.getMonth() === mes;
-        }).sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+        }).sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
     }
 
     actualizarTabla(registros) {
         const tbody = document.getElementById('cuerpo-tabla');
         const tabla = document.getElementById('tabla-registros');
         const sinRegistros = document.getElementById('sin-registros');
+        
+        if (!tbody || !tabla || !sinRegistros) return;
         
         tbody.innerHTML = '';
         
@@ -399,7 +448,7 @@ class RegistroTurnos {
                 <td><strong>${registro.horasTrabajadas}</strong></td>
                 <td>
                     <button class="btn btn-editar" onclick="app.editarRegistro('${registro.id}')">Editar</button>
-                    <button class="btn btn-eliminar" onclick="app.confirmarEliminarRegistro('${registro.id}')">Eliminar</button>
+                    <button class="btn btn-eliminar" onclick="app.eliminarRegistro('${registro.id}')">Eliminar</button>
                 </td>
             `;
             tbody.appendChild(fila);
@@ -407,6 +456,9 @@ class RegistroTurnos {
     }
 
     actualizarTotalHoras(registros) {
+        const totalHorasElement = document.getElementById('total-horas-mes');
+        if (!totalHorasElement) return;
+        
         const totalMinutos = registros.reduce((total, registro) => {
             if (!registro.horasTrabajadas) return total;
             const match = registro.horasTrabajadas.match(/(\d+)h (\d+)m/);
@@ -421,11 +473,11 @@ class RegistroTurnos {
         const horas = Math.floor(totalMinutos / 60);
         const minutos = totalMinutos % 60;
         
-        document.getElementById('total-horas-mes').textContent = `${horas}h ${minutos}m`;
+        totalHorasElement.textContent = `${horas}h ${minutos}m`;
     }
 
     formatearFecha(fechaString) {
-        const fecha = new Date(fechaString);
+        const fecha = new Date(fechaString + 'T00:00:00');
         const opciones = { day: '2-digit', month: '2-digit', year: 'numeric' };
         return fecha.toLocaleDateString('es-ES', opciones);
     }
@@ -445,7 +497,7 @@ class RegistroTurnos {
         document.getElementById('modal-editar').style.display = 'block';
     }
 
-    guardarEdicion(e) {
+    async guardarEdicion(e) {
         e.preventDefault();
         
         const registro = this.registros.find(r => r.id === this.editandoId);
@@ -460,24 +512,44 @@ class RegistroTurnos {
             registro.horaFin
         );
         
-        // Guardar cambios
-        this.guardarRegistros();
-        this.actualizarRegistrosMensuales();
-        this.cerrarModal();
-        
-        this.mostrarNotificacion('Registro actualizado correctamente', 'success');
+        // Guardar cambios en Supabase
+        try {
+            const { error } = await this.supabase
+                .from('registros_turnos')
+                .update({
+                    fecha: registro.fecha,
+                    hora_inicio: registro.horaInicio,
+                    hora_fin: registro.horaFin,
+                    horas_trabajadas: registro.horasTrabajadas
+                })
+                .eq('id', registro.id);
+            
+            if (error) throw error;
+            
+            this.actualizarRegistrosMensuales();
+            this.cerrarModal();
+            
+            this.mostrarNotificacion('Registro actualizado correctamente', 'success');
+        } catch (error) {
+            console.error('Error actualizando registro:', error);
+            this.mostrarNotificacion('Error actualizando registro', 'error');
+        }
     }
 
-    async eliminarRegistroFromSupabase(id) {
+    async eliminarRegistro(id) {
         if (!confirm('¿Estás seguro de que quieres eliminar este registro?')) return;
         
         try {
-            // Eliminar en Supabase
-            // await this.eliminarRegistroFromSupabase(id);
+            // Eliminar de Supabase
+            const { error } = await this.supabase
+                .from('registros_turnos')
+                .delete()
+                .eq('id', id);
             
-            // Eliminar en memoria
+            if (error) throw error;
+            
+            // Eliminar de memoria
             this.registros = this.registros.filter(r => r.id !== id);
-            
             this.actualizarRegistrosMensuales();
             
             this.mostrarNotificacion('Registro eliminado correctamente', 'success');
@@ -488,7 +560,10 @@ class RegistroTurnos {
     }
 
     cerrarModal() {
-        document.getElementById('modal-editar').style.display = 'none';
+        const modal = document.getElementById('modal-editar');
+        if (modal) {
+            modal.style.display = 'none';
+        }
         this.editandoId = null;
     }
 
@@ -496,7 +571,7 @@ class RegistroTurnos {
         const { jsPDF } = window.jspdf;
         if (!jsPDF) {
             console.error('jsPDF no está cargado');
-            this.mostrarNotificación('Error: librería PDF no disponible', 'error');
+            this.mostrarNotificacion('Error: librería PDF no disponible', 'error');
             return;
         }
         const doc = new jsPDF();
@@ -567,10 +642,10 @@ class RegistroTurnos {
         try {
             if (this.jornadaActiva) {
                 // Guardar jornada activa en localStorage para persistencia
-                localStorage.setItem('jornadaActiva', JSON.stringify(this.jornadaActiva));
+                localStorage.setItem(`jornadaActiva_${this.userId}`, JSON.stringify(this.jornadaActiva));
             } else {
                 // Limpiar jornada activa
-                localStorage.removeItem('jornadaActiva');
+                localStorage.removeItem(`jornadaActiva_${this.userId}`);
             }
         } catch (error) {
             console.error('Error guardando jornada activa:', error);
@@ -579,7 +654,9 @@ class RegistroTurnos {
 
     async cargarJornadaActiva() {
         try {
-            const guardada = localStorage.getItem('jornadaActiva');
+            if (!this.userId) return;
+            
+            const guardada = localStorage.getItem(`jornadaActiva_${this.userId}`);
             if (guardada) {
                 this.jornadaActiva = JSON.parse(guardada);
             }
@@ -607,15 +684,14 @@ class RegistroTurnos {
             return data[0];
         } catch (error) {
             console.error('Error guardando registro:', error);
-            // Fallback: guardar en localStorage
-            this.registros.unshift(registro);
-            this.guardarRegistrosLocal();
-            return registro;
+            throw error;
         }
     }
 
     async cargarRegistros() {
         try {
+            if (!this.userId) return;
+            
             // Cargar desde Supabase
             const { data, error } = await this.supabase
                 .from('registros_turnos')
@@ -625,10 +701,6 @@ class RegistroTurnos {
             
             if (error) throw error;
             
-            console.log('Datos de Supabase:', data);
-            console.log('Primer registro:', data[0]);
-            console.log('Keys del primer registro:', Object.keys(data[0] || {}));
-            
             // Transformar datos al formato esperado
             this.registros = data.map(registro => ({
                 id: registro.id,
@@ -636,75 +708,11 @@ class RegistroTurnos {
                 horaInicio: registro.hora_inicio,
                 horaFin: registro.hora_fin,
                 horasTrabajadas: registro.horas_trabajadas,
-                timestamp: registro.timestamp
+                timestamp: registro.created_at
             }));
         } catch (error) {
             console.error('Error cargando registros:', error);
-            // Fallback: cargar desde localStorage
-            this.cargarRegistrosLocal();
-        }
-    }
-
-    guardarRegistrosLocal() {
-        try {
-            localStorage.setItem('registros', JSON.stringify(this.registros));
-        } catch (error) {
-            console.error('Error guardando registros localmente:', error);
-        }
-    }
-
-    cargarRegistrosLocal() {
-        try {
-            const guardados = localStorage.getItem('registros');
-            console.log('Datos en localStorage:', guardados);
-            if (guardados) {
-                this.registros = JSON.parse(guardados);
-                console.log('Registros parseados:', this.registros);
-            }
-        } catch (error) {
-            console.error('Error cargando registros localmente:', error);
-        }
-    }
-
-    async guardarRegistros() {
-        try {
-            // Actualizar en Supabase
-            for (const registro of this.registros) {
-                await this.supabase
-                    .from('registros_turnos')
-                    .update({
-                        fecha: registro.fecha,
-                        hora_inicio: registro.horaInicio,
-                        hora_fin: registro.horaFin,
-                        horas_trabajadas: registro.horasTrabajadas
-                    })
-                    .eq('id', registro.id);
-            }
-        } catch (error) {
-            console.error('Error guardando registros:', error);
-            // Fallback: guardar localmente
-            this.guardarRegistrosLocal();
-        }
-    }
-
-    async eliminarRegistro(id) {
-        try {
-            // Eliminar de Supabase
-            const { error } = await this.supabase
-                .from('registros_turnos')
-                .delete()
-                .eq('id', id);
-            
-            if (error) throw error;
-            
-            // Eliminar de memoria
-            this.registros = this.registros.filter(r => r.id !== id);
-            this.actualizarRegistrosMensuales();
-            
-            this.mostrarNotificacion('Registro eliminado correctamente', 'success');
-        } catch (error) {
-            console.error('Error eliminando registro:', error);
-            this.mostrarNotificacion('Error eliminando registro', 'error');
+            this.registros = [];
         }
     }
 
@@ -735,7 +743,10 @@ class RegistroTurnos {
                 to { transform: translateX(0); opacity: 1; }
             }
         `;
-        document.head.appendChild(style);
+        if (!document.head.querySelector('style[data-notification]')) {
+            style.setAttribute('data-notification', 'true');
+            document.head.appendChild(style);
+        }
         
         document.body.appendChild(notificacion);
         

@@ -15,8 +15,8 @@
         <div class="login-card">
             <h1>Registro de Turnos</h1>
             <div class="login-tabs">
-                <button class="tab-btn active" id="tab-login" onclick="app.switchTab('login')">Iniciar Sesión</button>
-                <button class="tab-btn" id="tab-register" onclick="app.switchTab('register')">Registrarse</button>
+                <button class="tab-btn active" id="tab-login">Iniciar Sesión</button>
+                <button class="tab-btn" id="tab-register">Registrarse</button>
             </div>
             
             <!-- Login Form -->
@@ -50,7 +50,13 @@
     <!-- App Container -->
     <div id="app-container" class="container" style="display: none;">
         <header>
-            <h1>Registro de Turnos de Trabajo</h1>
+            <div class="header-content">
+                <h1>Registro de Turnos de Trabajo</h1>
+                <div class="user-info">
+                    <span id="user-email"></span>
+                    <button id="btn-logout" class="btn btn-secondary">Cerrar Sesión</button>
+                </div>
+            </div>
             <div class="fecha-actual">
                 <label for="fecha">Fecha:</label>
                 <input type="date" id="fecha" readonly>
