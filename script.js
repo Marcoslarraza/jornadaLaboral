@@ -16,9 +16,14 @@ class RegistroTurnos {
         this.inicializar();
     }
 
-    inicializar() {
+    async inicializar() {
         this.actualizarFechaYHora();
         this.configurarEventListeners();
+        
+        // Cargar datos guardados
+        await this.cargarJornadaActiva();
+        await this.cargarRegistros();
+        
         this.actualizarEstadoJornada();
         this.actualizarRegistrosMensuales();
         
