@@ -17,6 +17,135 @@ class RegistroTurnos {
         this.inicializar();
     }
 
+    // Métodos de autenticación
+    async registrar(email, password) {
+        try {
+            const { data, error } = await this.supabase.auth.signUp({
+                email: email,
+                password: password
+            });
+            
+            if (error) throw error;
+            
+            this.mostrarNotificacion('Registro exitoso. Revisa tu email para verificar.', 'success');
+            return true;
+        } catch (error) {
+            console.error('Error en registro:', error);
+            this.mostrarNotificacion('Error en registro: ' + error.message, 'error');
+            return false;
+        }
+    }
+
+    async login(email, password) {
+        try {
+            const { data, error } = await this.supabase.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+            
+            if (error) throw error;
+            
+            this.usuario = data.user;
+            this.userId = data.user.id;
+            
+            // Cargar datos del usuario
+            await this.cargarJornadaActiva();
+            await this.cargarRegistros();
+            
+            this.actualizarEstadoJornada();
+            this.actualizarRegistrosMensuales();
+            
+            this.mostrarInterfazPrincipal();
+            this.mostrarNotificacion(`Bienvenido ${data.user.email}`, 'success');
+            return true;
+        } catch (error) {
+            console.error('Error en login:', error);
+            this.mostrarNotificacion('Error en login: ' + error.message, 'error');
+            return false;
+        }
+    }
+
+    async logout() {
+        try {
+            await this.supabase.auth.signOut();
+            this.usuario = null;
+            this.userId = null;
+            this.registros = [];
+            this.jornadaActiva = null;
+            
+            this.mostrarInterfazLogin();
+            this.mostrarNotificacion('Sesión cerrada', 'success');
+        } catch (error) {
+            console.error('Error en logout:', error);
+        }
+    }
+
+    async verificarSesion() {
+        try {
+            const { data: { session } } = await this.supabase.auth.getSession();
+            
+            if (session) {
+                this.usuario = session.user;
+                this.userId = session.user.id;
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error verificando sesión:', error);
+            return false;
+        }
+    }
+
+    mostrarInterfazLogin() {
+        document.getElementById('login-container').style.display = 'block';
+        document.getElementById('app-container').style.display = 'none';
+    }
+
+    mostrarInterfazPrincipal() {
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('app-container').style.display = 'block';
+        document.getElementById('user-email').textContent = this.usuario.email;
+    }
+
+    switchTab(tab) {
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const loginTab = document.getElementById('tab-login');
+        const registerTab = document.getElementById('tab-register');
+        
+        if (tab === 'login') {
+            loginForm.classList.add('active');
+            registerForm.classList.remove('active');
+            loginTab.classList.add('active');
+            registerTab.classList.remove('active');
+        } else {
+            loginForm.classList.remove('active');
+            registerForm.classList.add('active');
+            loginTab.classList.remove('active');
+            registerTab.classList.add('active');
+        }
+    }
+
+    async handleLogin(e) {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        
+        await this.login(email, password);
+    }
+
+    async handleRegister(e) {
+        e.preventDefault();
+        const email = document.getElementById('register-email').value;
+        const password = document.getElementById('register-password').value;
+        
+        const registrado = await this.registrar(email, password);
+        if (registrado) {
+            // Cambiar a tab de login
+            this.switchTab('login');
+        }
+    }
+
     async inicializar() {
         this.actualizarFechaYHora();
         this.configurarEventListeners();
@@ -56,6 +185,15 @@ class RegistroTurnos {
     }
 
     configurarEventListeners() {
+        // Event listeners de autenticación
+        document.getElementById('login-form').addEventListener('submit', (e) => this.handleLogin(e));
+        document.getElementById('register-form').addEventListener('submit', (e) => this.handleRegister(e));
+        document.getElementById('btn-logout').addEventListener('click', () => this.logout());
+        
+        // Tabs de login
+        document.getElementById('tab-login').addEventListener('click', () => this.switchTab('login'));
+        document.getElementById('tab-register').addEventListener('click', () => this.switchTab('register'));
+        
         // Botones de jornada
         document.getElementById('btn-iniciar').addEventListener('click', () => this.iniciarJornada());
         document.getElementById('btn-finalizar').addEventListener('click', () => this.finalizarJornada());
