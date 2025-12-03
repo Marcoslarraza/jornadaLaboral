@@ -6,7 +6,8 @@ class RegistroTurnos {
         this.supabase = window.supabase.createClient(this.supabaseUrl, this.supabaseKey);
         
         // ID de usuario simple (en producción usarías autenticación real)
-        this.userId = 'user-demo-' + Date.now();
+        this.userId = localStorage.getItem('userId') || 'user-demo-' + Date.now();
+        localStorage.setItem('userId', this.userId);
         
         this.registros = [];
         this.jornadaActiva = null;
