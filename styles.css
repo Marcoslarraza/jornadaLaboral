@@ -715,12 +715,12 @@ tbody tr:hover {
     
     /* Tabla Responsive */
     .tabla-registros {
-        overflow-x: auto;
+        overflow-x: visible;
         -webkit-overflow-scrolling: touch;
     }
     
     #tabla-registros {
-        min-width: 600px;
+        min-width: 100%;
         font-size: 0.85rem;
     }
     
@@ -906,12 +906,12 @@ tbody tr:hover {
     
     /* Tabla */
     .tabla-registros {
-        overflow-x: auto;
+        overflow-x: visible;
         -webkit-overflow-scrolling: touch;
     }
     
     #tabla-registros {
-        min-width: 500px;
+        min-width: 100%;
         font-size: 0.75rem;
     }
     
