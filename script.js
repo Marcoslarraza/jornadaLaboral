@@ -236,63 +236,7 @@ class RegistroTurnos {
         }
         if (btnLogout) {
             btnLogout.addEventListener('click', () => this.logout());
-        }
         
-        // Tabs de login
-        const tabLogin = document.getElementById('tab-login');
-        const tabRegister = document.getElementById('tab-register');
-        
-        if (tabLogin) {
-            tabLogin.addEventListener('click', () => this.switchTab('login'));
-        }
-        if (tabRegister) {
-            tabRegister.addEventListener('click', () => this.switchTab('register'));
-        }
-        
-        // Botones de jornada
-        const btnIniciar = document.getElementById('btn-iniciar');
-        const btnFinalizar = document.getElementById('btn-finalizar');
-        
-        if (btnIniciar) {
-            btnIniciar.addEventListener('click', () => this.iniciarJornada());
-        }
-        if (btnFinalizar) {
-            btnFinalizar.addEventListener('click', () => this.finalizarJornada());
-        }
-        
-        // Controles de mes
-        const btnMesAnterior = document.getElementById('btn-mes-anterior');
-        const btnMesSiguiente = document.getElementById('btn-mes-siguiente');
-        
-        if (btnMesAnterior) {
-            btnMesAnterior.addEventListener('click', () => this.cambiarMes(-1));
-        }
-        if (btnMesSiguiente) {
-            btnMesSiguiente.addEventListener('click', () => this.cambiarMes(1));
-        }
-        
-        // Exportar PDF
-        const btnExportarPdf = document.getElementById('btn-exportar-pdf');
-        if (btnExportarPdf) {
-            btnExportarPdf.addEventListener('click', () => this.exportarPDF());
-        }
-        
-        // Modal
-        const formEditar = document.getElementById('form-editar');
-        const btnCancelarEditar = document.getElementById('btn-cancelar-editar');
-        const closeModal = document.querySelector('.close');
-        
-        if (formEditar) {
-            formEditar.addEventListener('submit', (e) => this.guardarEdicion(e));
-        }
-        if (btnCancelarEditar) {
-            btnCancelarEditar.addEventListener('click', () => this.cerrarModal());
-        }
-        if (closeModal) {
-            closeModal.addEventListener('click', () => this.cerrarModal());
-        }
-        
-        // Cerrar modal al hacer clic fuera
         window.addEventListener('click', (e) => {
             if (e.target === document.getElementById('modal-editar')) {
                 this.cerrarModal();
@@ -390,26 +334,70 @@ class RegistroTurnos {
         return `${horas}h ${minutos}m`;
     }
 
+    actualizarTimer() {
+        if (!this.jornadaActiva) {
+            const display = document.getElementById('timer-display');
+            if (display) display.textContent = '00:00:00';
+            return;
+        }
+
+        const inicio = new Date(this.jornadaActiva.timestamp);
+        const ahora = new Date();
+        const diff = ahora - inicio;
+
+        const horas = Math.floor(diff / 3600000);
+        const minutos = Math.floor((diff % 3600000) / 60000);
+        const segundos = Math.floor((diff % 60000) / 1000);
+
+        const formato = (n) => n.toString().padStart(2, '0');
+        const tiempoTexto = `${formato(horas)}:${formato(minutos)}:${formato(segundos)}`;
+        
+        const display = document.getElementById('timer-display');
+        if (display) display.textContent = tiempoTexto;
+    }
+
     actualizarEstadoJornada() {
-        const estadoDiv = document.getElementById('estado-jornada');
         const btnIniciar = document.getElementById('btn-iniciar');
         const btnFinalizar = document.getElementById('btn-finalizar');
-        
-        if (!estadoDiv || !btnIniciar || !btnFinalizar) return;
+        const estadoBadge = document.getElementById('estado-jornada');
         
         if (this.jornadaActiva) {
-            estadoDiv.innerHTML = `
-                <p class="estado-activo">
-                    <strong>Jornada activa</strong><br>
-                    Iniciada: ${this.jornadaActiva.fecha} ${this.jornadaActiva.horaInicio}
-                </p>
-            `;
-            btnIniciar.disabled = true;
-            btnFinalizar.disabled = false;
+            // Deshabilitar iniciar
+            if (btnIniciar) {
+                btnIniciar.disabled = true;
+                btnIniciar.style.opacity = '0.5';
+            }
+            // Habilitar finalizar y cambiar a color rojo/peligro
+            if (btnFinalizar) {
+                btnFinalizar.disabled = false;
+                btnFinalizar.style.opacity = '1';
+                btnFinalizar.classList.remove('btn-stop');
+                btnFinalizar.classList.add('btn-danger'); // Clase para color rojo
+                btnFinalizar.style.backgroundColor = '#ff453a'; // Rojo directo
+            }
+            if (estadoBadge) {
+                estadoBadge.textContent = 'En curso...';
+                estadoBadge.style.color = 'var(--primary-green)';
+            }
         } else {
-            estadoDiv.innerHTML = '<p class="estado-inactivo">No hay jornada activa</p>';
-            btnIniciar.disabled = false;
-            btnFinalizar.disabled = true;
+            // Habilitar iniciar
+            if (btnIniciar) {
+                btnIniciar.disabled = false;
+                btnIniciar.style.opacity = '1';
+            }
+            // Deshabilitar finalizar y volver a color gris
+            if (btnFinalizar) {
+                btnFinalizar.disabled = true;
+                btnFinalizar.style.opacity = '0.5';
+                btnFinalizar.classList.remove('btn-danger');
+                btnFinalizar.classList.add('btn-stop');
+                btnFinalizar.style.backgroundColor = '#333'; // Gris
+            }
+            if (estadoBadge) {
+                estadoBadge.textContent = 'Esperando inicio...';
+                estadoBadge.style.color = 'var(--text-gray)';
+            }
+            this.actualizarTimer(); // Reset timer
         }
     }
 
