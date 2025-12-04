@@ -1024,13 +1024,13 @@ tbody tr:hover {
 .registro-fecha {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #ffffff;
+    color: #4a90e2;
 }
 
 .registro-horas {
     font-size: 1rem;
     font-weight: 500;
-    color: #48bb78;
+    color: #4a90e2;
 }
 
 .registro-detalles {
@@ -1052,7 +1052,7 @@ tbody tr:hover {
 
 .registro-hora-valor {
     font-size: 0.95rem;
-    color: #ffffff;
+    color: #4a90e2;
     font-weight: 500;
 }
 
