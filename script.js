@@ -763,7 +763,7 @@ class RegistroTurnos {
                         user_id: this.userId,
                         fecha: this.jornadaActiva.fecha,
                         hora_inicio: this.jornadaActiva.horaInicio,
-                        timestamp: new Date(this.jornadaActiva.timestamp).toISOString().slice(0, -1)
+                        timestamp: new Date(this.jornadaActiva.timestamp).toISOString()
                     }, {
                         onConflict: 'user_id'
                     });
