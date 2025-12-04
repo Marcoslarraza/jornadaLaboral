@@ -419,21 +419,28 @@ class RegistroTurnos {
     }
 
     actualizarRegistrosMensuales() {
-        // Actualizar título del mes
-        const mesSpan = document.getElementById('mes-actual');
-        if (!mesSpan) return;
+        // Obtener fecha seleccionada del input
+        const fechaInput = document.getElementById('fecha-seleccionada');
+        if (!fechaInput || !fechaInput.value) {
+            // Si no hay fecha seleccionada, mostrar todos los registros del mes actual
+            const registrosMes = this.obtenerRegistrosMes(this.mesActual);
+            this.actualizarTabla(registrosMes);
+            this.actualizarTotalHoras(registrosMes);
+            return;
+        }
         
-        const opciones = { year: 'numeric', month: 'long' };
-        mesSpan.textContent = this.mesActual.toLocaleDateString('es-ES', opciones);
+        const fechaSeleccionada = fechaInput.value;
+
+        // Filtrar registros por fecha exacta
+        const registrosFiltrados = this.registros.filter(registro => 
+            registro.fecha === fechaSeleccionada
+        ).sort((a, b) => b.horaInicio.localeCompare(a.horaInicio));
         
-        // Filtrar registros del mes actual
-        const registrosMes = this.obtenerRegistrosMes(this.mesActual);
+        // Actualizar tabla (tarjetas)
+        this.actualizarTabla(registrosFiltrados);
         
-        // Actualizar tabla
-        this.actualizarTabla(registrosMes);
-        
-        // Actualizar total de horas
-        this.actualizarTotalHoras(registrosMes);
+        // Actualizar total horas (del día seleccionado)
+        this.actualizarTotalHoras(registrosFiltrados);
     }
 
     obtenerRegistrosMes(fecha) {
