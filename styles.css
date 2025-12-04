@@ -369,7 +369,7 @@ font-size: 0.9em;
 
 table {
     width: 100%;
-    min-width: 1200px;
+    min-width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
     background: rgba(255, 255, 255, 0.08);
@@ -720,7 +720,7 @@ tbody tr:hover {
     }
     
     #tabla-registros {
-        min-width: 900px;
+        min-width: 100%;
         font-size: 0.85rem;
     }
     
@@ -911,7 +911,7 @@ tbody tr:hover {
     }
     
     #tabla-registros {
-        min-width: 700px;
+        min-width: 100%;
         font-size: 0.75rem;
     }
     
