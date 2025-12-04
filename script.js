@@ -641,11 +641,27 @@ class RegistroTurnos {
     async guardarJornadaActiva() {
         try {
             if (this.jornadaActiva) {
-                // Guardar jornada activa en localStorage para persistencia
-                localStorage.setItem(`jornadaActiva_${this.userId}`, JSON.stringify(this.jornadaActiva));
+                // Guardar jornada activa en Supabase
+                const { error } = await this.supabase
+                    .from('jornadas_activas')
+                    .upsert({
+                        user_id: this.userId,
+                        fecha: this.jornadaActiva.fecha,
+                        hora_inicio: this.jornadaActiva.horaInicio,
+                        timestamp: this.jornadaActiva.timestamp
+                    }, {
+                        onConflict: 'user_id'
+                    });
+                
+                if (error) throw error;
             } else {
-                // Limpiar jornada activa
-                localStorage.removeItem(`jornadaActiva_${this.userId}`);
+                // Eliminar jornada activa de Supabase
+                const { error } = await this.supabase
+                    .from('jornadas_activas')
+                    .delete()
+                    .eq('user_id', this.userId);
+                
+                if (error) console.error('Error eliminando jornada activa:', error);
             }
         } catch (error) {
             console.error('Error guardando jornada activa:', error);
@@ -656,9 +672,34 @@ class RegistroTurnos {
         try {
             if (!this.userId) return;
             
-            const guardada = localStorage.getItem(`jornadaActiva_${this.userId}`);
-            if (guardada) {
-                this.jornadaActiva = JSON.parse(guardada);
+            // Cargar jornada activa desde Supabase
+            const { data, error } = await this.supabase
+                .from('jornadas_activas')
+                .select('*')
+                .eq('user_id', this.userId)
+                .single();
+            
+            if (error && error.code !== 'PGRST116') {
+                console.error('Error cargando jornada activa:', error);
+                return;
+            }
+            
+            if (data) {
+                // Verificar si la jornada es del mismo día (para no cargar jornadas antiguas)
+                const hoy = new Date().toISOString().split('T')[0];
+                if (data.fecha === hoy) {
+                    this.jornadaActiva = {
+                        fecha: data.fecha,
+                        horaInicio: data.hora_inicio,
+                        timestamp: data.timestamp
+                    };
+                } else {
+                    // Si es de otro día, eliminarla automáticamente
+                    await this.supabase
+                        .from('jornadas_activas')
+                        .delete()
+                        .eq('user_id', this.userId);
+                }
             }
         } catch (error) {
             console.error('Error cargando jornada activa:', error);
