@@ -422,36 +422,118 @@ class RegistroTurnos {
     }
 
     actualizarTabla(registros) {
-        const tbody = document.getElementById('cuerpo-tabla');
-        const tabla = document.getElementById('tabla-registros');
+        const container = document.getElementById('registros-container');
         const sinRegistros = document.getElementById('sin-registros');
         
-        if (!tbody || !tabla || !sinRegistros) return;
+        if (!container || !sinRegistros) return;
         
-        tbody.innerHTML = '';
+        container.innerHTML = '';
         
         if (registros.length === 0) {
-            tabla.style.display = 'none';
+            container.style.display = 'none';
             sinRegistros.style.display = 'block';
             return;
         }
         
-        tabla.style.display = 'table';
+        container.style.display = 'block';
         sinRegistros.style.display = 'none';
         
         registros.forEach(registro => {
-            const fila = document.createElement('tr');
-            fila.innerHTML = `
-                <td>${this.formatearFecha(registro.fecha)}</td>
-                <td>${registro.horaInicio}</td>
-                <td>${registro.horaFin}</td>
-                <td><strong>${registro.horasTrabajadas}</strong></td>
-                <td>
-                    <button class="btn btn-editar" onclick="app.editarRegistro('${registro.id}')">Editar</button>
-                    <button class="btn btn-eliminar" onclick="app.eliminarRegistro('${registro.id}')">Eliminar</button>
-                </td>
+            const item = document.createElement('div');
+            item.className = 'registro-item';
+            item.dataset.id = registro.id;
+            
+            item.innerHTML = `
+                <div class="registro-header">
+                    <div class="registro-fecha">${this.formatearFecha(registro.fecha)}</div>
+                    <div class="registro-horas">${registro.horasTrabajadas}</div>
+                </div>
+                <div class="registro-detalles">
+                    <div class="registro-hora">
+                        <div class="registro-hora-label">Inicio</div>
+                        <div class="registro-hora-valor">${registro.horaInicio}</div>
+                    </div>
+                    <div class="registro-hora">
+                        <div class="registro-hora-label">Fin</div>
+                        <div class="registro-hora-valor">${registro.horaFin}</div>
+                    </div>
+                </div>
+                <div class="registro-delete" onclick="app.eliminarRegistro('${registro.id}')">
+                    <span>Eliminar</span>
+                </div>
             `;
-            tbody.appendChild(fila);
+            
+            // Click para editar
+            item.addEventListener('click', (e) => {
+                if (!e.target.closest('.registro-delete')) {
+                    this.editarRegistro(registro.id);
+                }
+            });
+            
+            // Agregar funcionalidad de swipe
+            this.agregarSwipeFuncionalidad(item);
+            
+            container.appendChild(item);
+        });
+    }
+
+    agregarSwipeFuncionalidad(elemento) {
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+        const threshold = 80;
+        
+        const handleStart = (e) => {
+            isDragging = true;
+            startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            elemento.classList.add('swiping');
+        };
+        
+        const handleMove = (e) => {
+            if (!isDragging) return;
+            
+            e.preventDefault();
+            currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            const diffX = currentX - startX;
+            
+            if (diffX < 0) {
+                const translateX = Math.max(diffX, -threshold);
+                elemento.style.transform = `translateX(${translateX}px)`;
+            }
+        };
+        
+        const handleEnd = () => {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            elemento.classList.remove('swiping');
+            
+            const diffX = currentX - startX;
+            
+            if (Math.abs(diffX) > threshold / 2) {
+                elemento.classList.add('swiped');
+                elemento.style.transform = 'translateX(-80px)';
+            } else {
+                elemento.style.transform = 'translateX(0)';
+            }
+        };
+        
+        // Eventos para mouse
+        elemento.addEventListener('mousedown', handleStart);
+        document.addEventListener('mousemove', handleMove);
+        document.addEventListener('mouseup', handleEnd);
+        
+        // Eventos para touch
+        elemento.addEventListener('touchstart', handleStart);
+        document.addEventListener('touchmove', handleMove);
+        document.addEventListener('touchend', handleEnd);
+        
+        // Click fuera para cerrar swipe
+        document.addEventListener('click', (e) => {
+            if (!elemento.contains(e.target)) {
+                elemento.classList.remove('swiped');
+                elemento.style.transform = 'translateX(0)';
+            }
         });
     }
 
