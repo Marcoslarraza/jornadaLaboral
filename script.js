@@ -121,38 +121,41 @@ class RegistroTurnos {
     switchTab(tab) {
         const loginForm = document.getElementById('login-form');
         const registerForm = document.getElementById('register-form');
-        const loginTab = document.getElementById('tab-login');
-        const registerTab = document.getElementById('tab-register');
+        const tabBtns = document.querySelectorAll('.tab-btn');
         
         if (tab === 'login') {
-            loginForm.classList.add('active');
-            registerForm.classList.remove('active');
-            loginTab.classList.add('active');
-            registerTab.classList.remove('active');
+            if (loginForm) loginForm.classList.add('active');
+            if (registerForm) registerForm.classList.remove('active');
         } else {
-            loginForm.classList.remove('active');
-            registerForm.classList.add('active');
-            loginTab.classList.remove('active');
-            registerTab.classList.add('active');
+            if (loginForm) loginForm.classList.remove('active');
+            if (registerForm) registerForm.classList.add('active');
         }
+        
+        // Actualizar tabs activos
+        tabBtns.forEach(btn => {
+            if (btn.textContent.toLowerCase().includes(tab === 'login' ? 'iniciar' : 'registr')) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
     }
 
     async handleLogin(e) {
         e.preventDefault();
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
+        const email = document.getElementById('email-login').value;
+        const password = document.getElementById('password-login').value;
         
         await this.login(email, password);
     }
 
     async handleRegister(e) {
         e.preventDefault();
-        const email = document.getElementById('register-email').value;
-        const password = document.getElementById('register-password').value;
+        const email = document.getElementById('email-registro').value;
+        const password = document.getElementById('password-registro').value;
         
         const registrado = await this.registrar(email, password);
         if (registrado) {
-            // Cambiar a tab de login
             this.switchTab('login');
         }
     }
@@ -890,3 +893,17 @@ class RegistroTurnos {
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new RegistroTurnos();
 });
+
+// Función global para switchTab (usada en onclick del HTML)
+function switchTab(tab) {
+    if (window.app) {
+        window.app.switchTab(tab);
+    }
+}
+
+// Función global para exportar PDF (usada en onclick del HTML)
+function exportarPDF() {
+    if (window.app) {
+        window.app.exportarPDF();
+    }
+}
