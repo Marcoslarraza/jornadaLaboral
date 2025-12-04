@@ -10,120 +10,143 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
-    <!-- Login Container -->
-    <div id="login-container" class="login-container">
-        <div class="login-card">
-            <h1>Registro de Turnos</h1>
-            <div class="login-tabs">
-                <button class="tab-btn active" id="tab-login">Iniciar Sesión</button>
-                <button class="tab-btn" id="tab-register">Registrarse</button>
+    <div class="app-container">
+        <!-- Header Verde Estilo App -->
+        <header class="main-header">
+            <div class="header-top">
+                <div class="user-profile">
+                    <div class="avatar-circle">
+                        <span id="user-initials">U</span>
+                    </div>
+                    <div class="user-info">
+                        <h2 id="greeting-name">Hola, Usuario</h2>
+                        <p id="user-email-display">cargando...</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-icon" id="btn-logout" title="Cerrar Sesión">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    </button>
+                </div>
             </div>
-            
-            <!-- Login Form -->
-            <form id="login-form" class="auth-form active">
-                <div class="form-group">
-                    <label for="login-email">Email:</label>
-                    <input type="email" id="login-email" required>
-                </div>
-                <div class="form-group">
-                    <label for="login-password">Contraseña:</label>
-                    <input type="password" id="login-password" required>
-                </div>
-                <button type="submit" class="btn btn-primary btn-full">Iniciar Sesión</button>
-            </form>
-            
-            <!-- Register Form -->
-            <form id="register-form" class="auth-form">
-                <div class="form-group">
-                    <label for="register-email">Email:</label>
-                    <input type="email" id="register-email" required>
-                </div>
-                <div class="form-group">
-                    <label for="register-password">Contraseña:</label>
-                    <input type="password" id="register-password" required>
-                </div>
-                <button type="submit" class="btn btn-primary btn-full">Registrarse</button>
-            </form>
-        </div>
-    </div>
 
-    <!-- App Container -->
-    <div id="app-container" class="container" style="display: none;">
-        <header>
-            <div class="header-content">
-                <h1>Registro de Turnos de Trabajo</h1>
-                <div class="user-info">
-                    <span id="user-email"></span>
-                    <button id="btn-logout" class="btn btn-secondary">Cerrar Sesión</button>
-                </div>
+            <!-- Selector de Fecha Integrado -->
+            <div class="date-selector-container">
+                <label for="fecha-seleccionada">Gestionar fecha:</label>
+                <input type="date" id="fecha-seleccionada" class="date-input-modern">
             </div>
-            <div class="fecha-actual">
-                <label for="fecha">Fecha:</label>
-                <input type="date" id="fecha" readonly>
+
+            <!-- Tarjeta de Control de Jornada (Dentro del Header) -->
+            <div class="control-card">
+                <div class="timer-display" id="timer-display">00:00:00</div>
+                <div class="control-actions">
+                    <button id="btn-iniciar" class="btn-action btn-start">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        Iniciar Jornada
+                    </button>
+                    <button id="btn-finalizar" class="btn-action btn-stop" disabled>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                        Finalizar
+                    </button>
+                </div>
+                <div id="estado-jornada" class="status-badge">Esperando inicio...</div>
             </div>
         </header>
 
-        <main>
-            <section class="control-jornada">
-                <div class="jornada-inicio">
-                    <h2>Iniciar Jornada</h2>
-                    <div class="hora-control">
-                        <input type="time" id="hora-inicio" readonly>
-                        <button id="btn-iniciar" class="btn btn-primary">Iniciar Jornada</button>
-                    </div>
+        <!-- Login Section (Oculto por defecto) -->
+        <div id="auth-container" class="auth-overlay" style="display: none;">
+            <div class="login-card">
+                <h1>Bienvenido</h1>
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="app.switchTab('login')">Iniciar Sesión</button>
+                    <button class="tab-btn" onclick="app.switchTab('register')">Registrarse</button>
                 </div>
+                <form id="login-form" class="auth-form active">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="email-login" required placeholder="tu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="password-login" required placeholder="******">
+                    </div>
+                    <button type="submit" class="btn-full">Entrar</button>
+                </form>
+                <form id="register-form" class="auth-form">
+                    <div class="form-group">
+                        <label>Nombre Completo</label>
+                        <input type="text" id="nombre-registro" required placeholder="Juan Perez">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="email-registro" required placeholder="tu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="password-registro" required placeholder="******">
+                    </div>
+                    <button type="submit" class="btn-full">Registrarse</button>
+                </form>
+            </div>
+        </div>
 
-                <div class="jornada-fin">
-                    <h2>Finalizar Jornada</h2>
-                    <div class="hora-control">
-                        <input type="time" id="hora-fin" readonly>
-                        <button id="btn-finalizar" class="btn btn-secondary" disabled>Finalizar Jornada</button>
-                    </div>
-                </div>
-            </section>
+        <!-- Contenido Principal (Registros) -->
+        <main class="content-body">
+            <div class="stats-row">
+                <h3>Registros Recientes</h3>
+                <div class="total-badge" id="total-horas-mes">0h 0m</div>
+            </div>
 
-            <section class="estado-jornada">
-                <div id="estado-jornada" class="estado-inactivo">
-                    <p>No hay jornada activa</p>
-                </div>
-            </section>
-
-            <section class="registros-mensuales">
-                <div class="header-registros">
-                    <h2>Registros del Mes</h2>
-                    <div class="controles-mes">
-                        <button id="btn-mes-anterior" class="btn btn-small">← Mes Anterior</button>
-                        <span id="mes-actual"></span>
-                        <button id="btn-mes-siguiente" class="btn btn-small">Mes Siguiente →</button>
-                    </div>
-                </div>
-                
-                <div class="resumen-mensual">
-                    <div class="total-horas">
-                        <strong>Total horas trabajadas este mes:</strong>
-                        <span id="total-horas-mes">0h 0m</span>
-                    </div>
-                    <button id="btn-exportar-pdf" class="btn btn-export">Exportar a PDF</button>
-                </div>
-
-                <div class="tabla-registros">
-                    <div class="registros-container" id="registros-container">
-                    </div>
-                    <div id="sin-registros" class="sin-registros">
-                        No hay registros para este mes
-                    </div>
-                </div>
-            </section>
+            <div class="registros-container" id="registros-container">
+                <!-- Los registros se insertarán aquí -->
+            </div>
+            
+            <div id="sin-registros" class="sin-registros" style="display: none;">
+                No hay registros para esta fecha
+            </div>
         </main>
 
-        <!-- Modal para editar registro -->
-        <div id="modal-editar" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2>Editar Registro</h2>
-                <form id="form-editar">
-                    <div class="form-group">
-                        <label for="editar-fecha">Fecha:</label>
+        <!-- Navegación Inferior -->
+        <nav class="bottom-nav">
+            <button class="nav-item active">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </button>
+            <button class="nav-item" onclick="app.exportarPDF()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            </button>
+            <button class="nav-item">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Modal para editar registro -->
+    <div id="modal-editar" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Editar Registro</h2>
+            <form id="form-editar">
+                <div class="form-group">
+                    <label for="editar-fecha">Fecha:</label>
+                    <input type="date" id="editar-fecha" required>
+                </div>
+                <div class="form-group">
+                    <label for="editar-hora-inicio">Hora Inicio:</label>
+                    <input type="time" id="editar-hora-inicio" required>
+                </div>
+                <div class="form-group">
+                    <label for="editar-hora-fin">Hora Fin:</label>
+                    <input type="time" id="editar-hora-fin" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <button type="button" class="btn btn-secondary" id="btn-cancelar-editar">Cancelar</button>
+                </div>
+            </form>
                         <input type="date" id="editar-fecha" required>
                     </div>
                     <div class="form-group">
