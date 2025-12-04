@@ -52,10 +52,9 @@ class RegistroTurnos {
             await this.cargarJornadaActiva();
             await this.cargarRegistros();
             
-            this.actualizarEstadoJornada();
-            this.actualizarRegistrosMensuales();
+            // Actualizar UI
+            this.actualizarUI();
             
-            this.mostrarInterfazPrincipal();
             this.mostrarNotificacion(`Bienvenido ${data.user.email}`, 'success');
             return true;
         } catch (error) {
@@ -92,8 +91,8 @@ class RegistroTurnos {
                 await this.cargarJornadaActiva();
                 await this.cargarRegistros();
                 
-                this.actualizarEstadoJornada();
-                this.actualizarRegistrosMensuales();
+                // Actualizar UI después de cargar datos
+                this.actualizarUI();
                 
                 return true;
             }
@@ -105,17 +104,12 @@ class RegistroTurnos {
     }
 
     mostrarInterfazLogin() {
-        document.getElementById('login-container').style.display = 'flex';
-        document.getElementById('app-container').style.display = 'none';
+        const loginContainer = document.getElementById('auth-container');
+        if (loginContainer) loginContainer.style.display = 'flex';
     }
 
     mostrarInterfazPrincipal() {
-        document.getElementById('login-container').style.display = 'none';
-        document.getElementById('app-container').style.display = 'block';
-        const userEmailElement = document.getElementById('user-email');
-        if (userEmailElement && this.usuario) {
-            userEmailElement.textContent = this.usuario.email;
-        }
+        this.actualizarUI();
     }
 
     switchTab(tab) {
