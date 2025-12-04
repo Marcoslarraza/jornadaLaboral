@@ -257,9 +257,6 @@ class RegistroTurnos {
         }
     }
 
-        });
-    }
-
     async iniciarJornada() {
         const ahora = new Date();
         const fecha = ahora.toISOString().split('T')[0];
