@@ -112,6 +112,34 @@ class RegistroTurnos {
         this.actualizarUI();
     }
 
+    actualizarUI() {
+        const loginContainer = document.getElementById('auth-container');
+        
+        if (this.usuario) {
+            if (loginContainer) loginContainer.style.display = 'none';
+            
+            // Actualizar info usuario
+            const emailDisplay = document.getElementById('user-email-display');
+            const nameDisplay = document.getElementById('greeting-name');
+            const initialsDisplay = document.getElementById('user-initials');
+            
+            if (emailDisplay) emailDisplay.textContent = this.usuario.email;
+            
+            // Obtener nombre o usar parte del email
+            const name = this.usuario.user_metadata?.full_name || this.usuario.email.split('@')[0];
+            if (nameDisplay) nameDisplay.textContent = `Hola, ${name}`;
+            
+            if (initialsDisplay) {
+                initialsDisplay.textContent = name.charAt(0).toUpperCase();
+            }
+            
+            this.actualizarRegistrosMensuales();
+            this.actualizarEstadoJornada();
+        } else {
+            if (loginContainer) loginContainer.style.display = 'flex';
+        }
+    }
+
     switchTab(tab) {
         const loginForm = document.getElementById('login-form');
         const registerForm = document.getElementById('register-form');
