@@ -192,11 +192,46 @@ class RegistroTurnos {
             this.mostrarInterfazLogin();
         }
         
-        this.actualizarFechaYHora();
-        this.configurarEventListeners();
+        // Inicializar fecha con hoy
+        const fechaInput = document.getElementById('fecha-seleccionada');
+        if (fechaInput) {
+            fechaInput.value = new Date().toISOString().split('T')[0];
+        }
         
-        // Actualizar hora cada segundo
-        setInterval(() => this.actualizarFechaYHora(), 1000);
+        this.iniciarEventos();
+        
+        // Timer loop
+        setInterval(() => this.actualizarTimer(), 1000);
+    }
+
+    iniciarEventos() {
+        // Auth events
+        document.getElementById('login-form')?.addEventListener('submit', (e) => this.handleLogin(e));
+        document.getElementById('register-form')?.addEventListener('submit', (e) => this.handleRegister(e));
+        document.getElementById('btn-logout')?.addEventListener('click', () => this.logout());
+
+        // Jornada events
+        document.getElementById('btn-iniciar')?.addEventListener('click', () => this.iniciarJornada());
+        document.getElementById('btn-finalizar')?.addEventListener('click', () => this.finalizarJornada());
+
+        // Date picker event - IMPORTANTE: actualizar cuando cambie la fecha
+        const dateInput = document.getElementById('fecha-seleccionada');
+        if (dateInput) {
+            dateInput.addEventListener('change', () => {
+                this.actualizarRegistrosMensuales();
+            });
+        }
+
+        // Modal events
+        document.getElementById('form-editar')?.addEventListener('submit', (e) => this.guardarEdicion(e));
+        document.getElementById('btn-cancelar-editar')?.addEventListener('click', () => this.cerrarModal());
+        document.querySelector('.close')?.addEventListener('click', () => this.cerrarModal());
+        
+        window.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('modal-editar')) {
+                this.cerrarModal();
+            }
+        });
     }
 
     actualizarFechaYHora() {
@@ -222,25 +257,6 @@ class RegistroTurnos {
         }
     }
 
-    configurarEventListeners() {
-        // Event listeners de autenticación
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        const btnLogout = document.getElementById('btn-logout');
-        
-        if (loginForm) {
-            loginForm.addEventListener('submit', (e) => this.handleLogin(e));
-        }
-        if (registerForm) {
-            registerForm.addEventListener('submit', (e) => this.handleRegister(e));
-        }
-        if (btnLogout) {
-            btnLogout.addEventListener('click', () => this.logout());
-        
-        window.addEventListener('click', (e) => {
-            if (e.target === document.getElementById('modal-editar')) {
-                this.cerrarModal();
-            }
         });
     }
 
