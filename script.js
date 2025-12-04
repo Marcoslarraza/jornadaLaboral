@@ -806,7 +806,7 @@ class RegistroTurnos {
                     this.jornadaActiva = {
                         fecha: data.fecha,
                         horaInicio: data.hora_inicio,
-                        timestamp: data.timestamp
+                        timestamp: new Date(data.timestamp).getTime()
                     };
                 } else {
                     // Si es de otro día, eliminarla automáticamente
