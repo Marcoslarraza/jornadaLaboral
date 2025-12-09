@@ -259,7 +259,10 @@ class RegistroTurnos {
 
     async iniciarJornada() {
         const ahora = new Date();
-        const fecha = ahora.toISOString().split('T')[0];
+        const fechaSeleccionInput = document.getElementById('fecha-seleccionada');
+        const fecha = (fechaSeleccionInput && fechaSeleccionInput.value)
+            ? fechaSeleccionInput.value
+            : ahora.toISOString().split('T')[0];
         const hora = ahora.toTimeString().slice(0, 5);
         
         this.jornadaActiva = {
