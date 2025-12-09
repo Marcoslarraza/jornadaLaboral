@@ -317,7 +317,8 @@ class RegistroTurnos {
             
             // Actualizar interfaz
             this.actualizarEstadoJornada();
-            this.actualizarRegistrosMensuales();
+            // Mostrar nuevamente todos los registros del mes
+            this.actualizarRegistrosMensuales(true);
             
             // Mostrar notificación
             this.mostrarNotificacion('Jornada finalizada correctamente', 'success');
@@ -436,11 +437,11 @@ class RegistroTurnos {
         this.actualizarRegistrosMensuales();
     }
 
-    actualizarRegistrosMensuales() {
+    actualizarRegistrosMensuales(forzarMesCompleto = false) {
         // Obtener fecha seleccionada del input
         const fechaInput = document.getElementById('fecha-seleccionada');
-        if (!fechaInput || !fechaInput.value) {
-            // Si no hay fecha seleccionada, mostrar todos los registros del mes actual
+        if (forzarMesCompleto || !fechaInput || !fechaInput.value) {
+            // Si no hay fecha seleccionada (o se fuerza vista mensual), mostrar todos los registros del mes actual
             const registrosMes = this.obtenerRegistrosMes(this.mesActual);
             this.actualizarTabla(registrosMes);
             this.actualizarTotalHoras(registrosMes);
