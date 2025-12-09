@@ -686,7 +686,8 @@ class RegistroTurnos {
             
             // Eliminar de memoria
             this.registros = this.registros.filter(r => r.id !== id);
-            this.actualizarRegistrosMensuales();
+            // Mostrar todos los registros del mes (no solo la fecha filtrada)
+            this.actualizarRegistrosMensuales(true);
             
             this.mostrarNotificacion('Registro eliminado correctamente', 'success');
         } catch (error) {
