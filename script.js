@@ -13,6 +13,8 @@ class RegistroTurnos {
         this.jornadaActiva = null;
         this.mesActual = new Date();
         this.editandoId = null;
+        this.avisado1Hora = false;
+        this.avisado8Horas = false;
         
         this.inicializar();
     }
@@ -270,6 +272,8 @@ class RegistroTurnos {
             horaInicio: hora,
             timestamp: ahora.getTime()
         };
+        this.avisado1Hora = false;
+        this.avisado8Horas = false;
         
         await this.guardarJornadaActiva();
         this.actualizarEstadoJornada();
@@ -317,6 +321,8 @@ class RegistroTurnos {
             // Limpiar jornada activa
             this.jornadaActiva = null;
             await this.guardarJornadaActiva();
+            this.avisado1Hora = false;
+            this.avisado8Horas = false;
             
             // Actualizar interfaz
             this.actualizarEstadoJornada();
@@ -377,6 +383,19 @@ class RegistroTurnos {
         // Si la diferencia es negativa, asumimos que la jornada cruzó medianoche
         if (diff < 0) {
             diff += 24 * 60 * 60 * 1000;
+        }
+
+        const unaHoraMs = 60 * 60 * 1000;
+        const ochoHorasMs = 8 * 60 * 60 * 1000;
+
+        if (!this.avisado1Hora && diff >= unaHoraMs) {
+            this.avisado1Hora = true;
+            this.mostrarNotificacion('Llevas más de 1 hora con la jornada en curso', 'success');
+        }
+
+        if (!this.avisado8Horas && diff >= ochoHorasMs) {
+            this.avisado8Horas = true;
+            this.mostrarNotificacion('Llevas más de 8 horas con la jornada en curso', 'error');
         }
 
         const horas = Math.floor(diff / 3600000);
