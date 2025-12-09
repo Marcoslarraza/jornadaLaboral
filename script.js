@@ -354,9 +354,26 @@ class RegistroTurnos {
             return;
         }
 
-        const inicio = new Date(this.jornadaActiva.timestamp);
         const ahora = new Date();
-        const diff = ahora - inicio;
+
+        // Calcular diferencia usando la hora de inicio registrada y la hora actual
+        const [inicioHoras, inicioMinutos] = (this.jornadaActiva.horaInicio || '00:00').split(':').map(Number);
+        const inicioHoy = new Date(
+            ahora.getFullYear(),
+            ahora.getMonth(),
+            ahora.getDate(),
+            inicioHoras,
+            inicioMinutos,
+            0,
+            0
+        );
+
+        let diff = ahora - inicioHoy;
+
+        // Si la diferencia es negativa, asumimos que la jornada cruzó medianoche
+        if (diff < 0) {
+            diff += 24 * 60 * 60 * 1000;
+        }
 
         const horas = Math.floor(diff / 3600000);
         const minutos = Math.floor((diff % 3600000) / 60000);
